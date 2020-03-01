@@ -3,7 +3,12 @@ import time
 import json
 import requests
 import string
-from account_keys import *
+
+# # For Public Repo
+# from account_keys import *
+
+# For Running Bot
+from twitter_keys import *
 
 # Twitter API Config
 auth = tweepy.OAuthHandler(API_KEY, API_SECRET)
