@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import tweepy
 import time
 import json
@@ -22,6 +23,7 @@ EUR = ["eur", "euro", "euros"]
 GBP = ["gbp", "libra", "libras", "esterlina", "esterlinas", "pound", "sterling"]
 JPY = ["jpy", "jpn", "yen", "yens", "yene", "yenes", "ien", "iens", "iene", "ienes"]
 ARS = ["ars", "peso", "pesos", "argentina", "argentino", "argentinos", "convertible"]
+CNY = ["cny", "rmb", "yuan", "yuans", "iuan", "iuans", "iuane", "iuanes", "renminbi", "renminbis", "renmimbi", "renmimbis", "remimbi", "remimbis", "remmimbi", "remmimbis", "chinês", "chines", "china"]
 REQUEST_URL = "https://economia.awesomeapi.com.br/json/"
 
 # Pokémon Config
@@ -52,7 +54,7 @@ def reply_to_tweets():
         tweet_text = mention.full_text.lower().split()
         for tweet_word in tweet_text:
             table_punctuation = str.maketrans(dict.fromkeys(string.punctuation))
-            word = tweet_word.translate(table_punctuation)      
+            word = tweet_word.translate(table_punctuation)
             print(word)
             if word in USD:
                 current_currency = "USD"
@@ -69,24 +71,33 @@ def reply_to_tweets():
             if word in ARS:
                 current_currency = "ARS"
                 break
+            if word in CNY:
+                current_currency = "CNY"
+                break
         if current_currency != "":
             currency_info = request_value(current_currency)
             currency_value = "{:.2f}".format(float(currency_info['ask']))
             pokemon_number = currency_value.replace('.','')
             pokemon_name = pokemon_list[int(pokemon_number)-1]['name']['english']
             pokemon_image_path = 'pokemon_images/{}.png'.format(pokemon_number)
+            if current_currency == "ARS" or current_currency == "JPY":
+                currency_value = "{:.3f}".format(float(currency_info['ask']))
             post_message = "@{0} A cotação atual de 1 {1} é: R${2}!\n\nPokémon #{3} - {4}".format(mention.user.screen_name, currency_info['name'], currency_value.replace('.',','), pokemon_number, pokemon_name)
             api.update_with_media(
                 filename = pokemon_image_path,
                 status = post_message,
                 in_reply_to_status_id = mention.id
             )
+            print("@{0} respondido por {1}!".format(mention.user.screen_name, pokemon_name))
 
 def request_value(currency):
     request = requests.get("{0}{1}".format(REQUEST_URL, currency))
-    exchange_json = json.loads(request.content)
+    exchange_json = json.loads(request.content.decode('utf-8'))
     return exchange_json[0]
 
 while True:
-    reply_to_tweets()
+    try:
+        reply_to_tweets()
+    except:
+        print("Exception")
     time.sleep(15)
