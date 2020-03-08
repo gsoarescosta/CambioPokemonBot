@@ -5,11 +5,8 @@ import json
 import requests
 import string
 
-# # For Public Repo
-# from account_keys import *
-
 # For Running Bot
-from twitter_keys import *
+from account_keys import *
 
 # Twitter API Config
 auth = tweepy.OAuthHandler(API_KEY, API_SECRET)
@@ -47,6 +44,8 @@ def reply_to_tweets():
     last_seen_id = retrieve_last_seen_id(FILE_NAME)
     mentions = api.mentions_timeline(last_seen_id, tweet_mode='extended')
     for mention in reversed(mentions):
+        if mention.user.screen_name == "cambiopokemon":
+            continue
         print(str(mention.id) + ' - ' + mention.full_text)
         last_seen_id = mention.id
         store_last_seen_id(last_seen_id, FILE_NAME)
